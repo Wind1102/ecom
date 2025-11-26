@@ -9,6 +9,40 @@ import (
 	"context"
 )
 
+const createOrder = `-- name: CreateOrder :one
+INSERT INTO orders (customer_id) VALUES ($1) RETURNING id, customer_id, created_at
+`
+
+func (q *Queries) CreateOrder(ctx context.Context, customerID int64) (Order, error) {
+	row := q.db.QueryRow(ctx, createOrder, customerID)
+	var i Order
+	err := row.Scan(&i.ID, &i.CustomerID, &i.CreatedAt)
+	return i, err
+}
+
+const createOrderItem = `-- name: CreateOrderItem :one
+INSERT INTO order_items (order_id, product_id, quantity, price_cents)
+VALUES ($1, $2, $3, $4) RETURNING id, order_id, product_id, quantity, price_cents
+`
+
+func (q *Queries) CreateOrderItem(ctx context.Context, orderID int64, productID int64, quantity int32, priceCents int32) (OrderItem, error) {
+	row := q.db.QueryRow(ctx, createOrderItem,
+		orderID,
+		productID,
+		quantity,
+		priceCents,
+	)
+	var i OrderItem
+	err := row.Scan(
+		&i.ID,
+		&i.OrderID,
+		&i.ProductID,
+		&i.Quantity,
+		&i.PriceCents,
+	)
+	return i, err
+}
+
 const findProductById = `-- name: FindProductById :one
 SELECT id, name, price_in_centers, quantity, created_at from products where id = $1
 `

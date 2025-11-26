@@ -38,8 +38,8 @@ func (app *application) mount() http.Handler {
 	productsService := products.NewService(repo.New(app.db))
 	productHandler := products.NewHandler(productsService)
 
-	ordersService := orders.NewService(repo.New(app.db))
-	ordersHandler := orders.NewHandler(orders.NewService(ordersService))
+	ordersService := orders.NewService(repo.New(app.db), app.db)
+	ordersHandler := orders.NewHandler(ordersService)
 
 	r.Get("/products", productHandler.ListProducts)
 	r.Get("/products/{id}", productHandler.FindProductById)
